@@ -1,0 +1,11 @@
+id,name,age,gender,income
+1,Juan,21,M,15000
+2,Maria,22,F,18000
+3,Pedro,,M,17000
+4,Maria,22,F,18000
+5,Unknown,-50,X,-900000
+6,Ana,25,F,22000
+7,Jose,27,M,25000
+8,Luis,26,M,23000
+9,Carlos,24,M,21000
+10,Sofia,23,F,20000
