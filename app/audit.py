@@ -26,7 +26,16 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    report = run_audit(args.file)
+    try:
+        report = run_audit(args.file)
+
+    except FileNotFoundError as exc:
+        print(f"\nERROR: {exc}")
+        raise SystemExit(1)
+
+    except ValueError as exc:
+        print(f"\nERROR: {exc}")
+        raise SystemExit(1)
 
     print()
     print("=" * 60)

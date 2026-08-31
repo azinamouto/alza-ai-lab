@@ -1,14 +1,19 @@
 from pathlib import Path
 
 import pandas as pd
+from pandas.errors import EmptyDataError, ParserError
 
 from app.auditor.anomaly import detect_anomalies
 from app.auditor.profiler import profile_csv
-from app.auditor.quality import (
-    check_allowed_values,
-    check_missing_values,
-    check_numeric_ranges,
-)
+from app.auditor.quality import validate_columns
+from app.core.schemas import ColumnRule
+
+
+DEFAULT_RULES = [
+    ColumnRule(column="age", minimum=0, maximum=120),
+    ColumnRule(column="income", minimum=0),
+    ColumnRule(column="gender", allowed_values=["M", "F"]),
+]
 
 
 def audit_csv(file_path: str) -> dict:
@@ -23,7 +28,18 @@ def audit_csv(file_path: str) -> dict:
             f"Dataset not found: {file_path}"
         )
 
-    df = pd.read_csv(path)
+    try:
+        df = pd.read_csv(path)
+
+    except EmptyDataError as exc:
+        raise ValueError(
+            "The CSV file contains no readable data."
+        ) from exc
+
+    except ParserError as exc:
+        raise ValueError(
+            "The CSV file is malformed and could not be parsed."
+        ) from exc
 
     profile = profile_csv(file_path)
 
@@ -34,34 +50,9 @@ def audit_csv(file_path: str) -> dict:
     # -------------------------
 
     issues.extend(
-        check_missing_values(df)
-    )
-
-    numeric_rules = {
-        "age": {
-            "min": 0,
-            "max": 120,
-        },
-        "income": {
-            "min": 0,
-        },
-    }
-
-    issues.extend(
-        check_numeric_ranges(
+        validate_columns(
             df,
-            numeric_rules,
-        )
-    )
-
-    category_rules = {
-        "gender": ["M", "F"],
-    }
-
-    issues.extend(
-        check_allowed_values(
-            df,
-            category_rules,
+            DEFAULT_RULES,
         )
     )
 
@@ -69,7 +60,7 @@ def audit_csv(file_path: str) -> dict:
     # ML ENGINE
     # -------------------------
 
-    ml_anomalies = detect_anomalies(df)
+    ml_anomalies = detect_anomalies(df, rules=DEFAULT_RULES)
 
     error_count = sum(
         1

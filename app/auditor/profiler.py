@@ -28,9 +28,13 @@ def profile_csv(file_path: str) -> dict:
                 "name": column,
                 "dtype": str(series.dtype),
                 "missing": int(series.isna().sum()),
-                "missing_percentage": round(
-                    float(series.isna().mean() * 100),
-                    2,
+                "missing_percentage": (
+                    0.0
+                    if len(df) == 0
+                    else round(
+                        float(series.isna().mean() * 100),
+                        2,
+                    )
                 ),
                 "unique_values": int(
                     series.nunique(dropna=True)

@@ -23,6 +23,19 @@ class DatasetProfile(BaseModel):
     column_profiles: list[ColumnProfile]
 
 
+class ColumnRule(BaseModel):
+    column: str
+    expected_dtype: str | None = None
+    required: bool = False
+    nullable: bool = True
+    minimum: float | int | None = None
+    maximum: float | int | None = None
+    allowed_values: list[Any] | None = None
+    unique: bool = False
+    severity: Severity | None = None
+    include_in_ml: bool | None = None
+
+
 class AuditIssue(BaseModel):
     type: str
     column: str | None = None
